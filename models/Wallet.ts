@@ -91,7 +91,7 @@ const walletSchema = new mongoose.Schema({
 // Ensure only one default wallet per cryptocurrency per user
 walletSchema.pre('save', async function(next) {
   if (this.isDefault) {
-    await this.constructor.updateMany(
+    await (this.constructor as any).updateMany(
       { userId: this.userId, cryptocurrency: this.cryptocurrency, _id: { $ne: this._id } },
       { isDefault: false }
     );
