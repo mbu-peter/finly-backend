@@ -8,19 +8,14 @@ const router = express.Router();
 
 // Initialize OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'dummy_key'
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-/**
- * @route POST /api/agent/insights
- * @desc Get AI-driven market and portfolio insights
- */
 router.post('/insights', authMiddleware, async (req: AuthRequest, res) => {
   try {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // Fetch latest market data for context
     const marketResponse = await axios.get(`${process.env.VITE_API_BASE_URL || 'http://localhost:5000'}/api/market/prices`);
     const marketData = marketResponse.data;
 
@@ -48,10 +43,9 @@ router.post('/insights', authMiddleware, async (req: AuthRequest, res) => {
         { role: "system", content: "You are a helpful financial assistant. Return raw JSON only." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" }
     });
 
-    const text = completion.choices[0].message.content || '{}';
+    const text = completion.choices[0].message?.content || '{}';
     const content = JSON.parse(text);
     res.json(content);
 
@@ -61,42 +55,6 @@ router.post('/insights', authMiddleware, async (req: AuthRequest, res) => {
       insight: "Market volatility is high. Consider diversifying your portfolio.", 
       sentiment: "neutral" 
     });
-  }
-});
-
-/**
- * @route POST /api/agent/chat
- * @desc General chat with the ChartAgent
- */
-router.post('/chat', authMiddleware, async (req: AuthRequest, res) => {
-  const { message, history } = req.body;
-
-  try {
-    const messages: any[] = [
-      { role: "system", content: "You are 'Vibe', the advanced AI assistant for the Finly platform. You are helpful, witty, and an expert in crypto and personal finance. Keep answers short and impactful." }
-    ];
-
-    if (history && Array.isArray(history)) {
-      history.forEach((msg: any) => {
-        messages.push({
-          role: msg.role === 'model' ? 'assistant' : 'user',
-          content: msg.parts[0].text
-        });
-      });
-    }
-
-    messages.push({ role: "user", content: message });
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: messages,
-    });
-
-    const reply = completion.choices[0].message.content;
-    res.json({ response: reply });
-  } catch (error: any) {
-    console.error('AI Chat error:', error);
-    res.status(500).json({ message: 'Failed to chat with AI', error: error.message });
   }
 });
 
