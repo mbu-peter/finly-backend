@@ -84,7 +84,7 @@ router.post(
 
       const tags = req.body.tags ? (typeof req.body.tags === 'string' ? req.body.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : req.body.tags) : [];
 
-      if (!req.user || !req.user.id) {
+      if (!req.user || !(req.user as any).id) {
         return res.status(401).json({ message: 'User not authenticated' });
       }
 
@@ -97,7 +97,7 @@ router.post(
         featured: req.body.featured === 'true' || req.body.featured === true,
         published: req.body.published === 'true' || req.body.published === true,
         tags: tags,
-        authorId: req.user.id
+        authorId: (req.user as any).id
       });
 
       res.status(201).json(post);
