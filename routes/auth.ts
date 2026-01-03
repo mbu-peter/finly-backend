@@ -8,7 +8,7 @@ import qrcode from 'qrcode';
 import User from '../models/User.js';
 import Notification from '../models/Notification.js';
 import { sendResetEmail } from '../utils/mailer.js';
-import { authMiddleware } from '../middleware/auth.js';
+import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -331,7 +331,7 @@ router.post('/enable-2fa', authMiddleware, async (req: AuthRequest, res) => {
     });
 
     // Generate QR code
-    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
+    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url!);
 
     // Generate backup codes
     const backupCodes = [];
