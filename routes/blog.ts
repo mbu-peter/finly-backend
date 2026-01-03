@@ -4,7 +4,20 @@ import { authMiddleware } from '../middleware/auth.js';
 import { adminOnly } from '../middleware/admin.js';
 import { upload, blogUpload } from '../middleware/upload.js';
 
-const slugify = require('slugify');
+// Import slugify dynamically to avoid ES module issues
+let slugify: any;
+const initSlugify = async () => {
+  if (!slugify) {
+    try {
+      slugify = (await import('slugify')).default;
+    } catch (error) {
+      console.error('Failed to import slugify:', error);
+      // Fallback function
+      slugify = (text: string) => text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '');
+    }
+  }
+  return slugify;
+};
 
 const router = express.Router();
 
@@ -77,7 +90,7 @@ router.post(
     try {
       console.log('Creating blog - Body:', req.body);
       console.log('Creating blog - File:', req.file);
-      
+
       if (!req.body.title || !req.body.excerpt || !req.body.content) {
         return res.status(400).json({ message: 'Title, excerpt, and content are required' });
       }
@@ -88,9 +101,11 @@ router.post(
         return res.status(401).json({ message: 'User not authenticated' });
       }
 
+      const slugifyFn = await initSlugify();
+
       const post = await BlogPost.create({
         title: req.body.title,
-        slug: slugify(req.body.title, { lower: true }),
+        slug: slugifyFn(req.body.title, { lower: true }),
         excerpt: req.body.excerpt,
         content: req.body.content,
         coverImage: req.file ? `/uploads/${req.file.filename}` : undefined,
@@ -125,10 +140,11 @@ router.put(
   async (req, res) => {
     try {
       const update: any = {};
-      
+
       if (req.body.title) {
         update.title = req.body.title;
-        update.slug = slugify(req.body.title, { lower: true });
+        const slugifyFn = await initSlugify();
+        update.slug = slugifyFn(req.body.title, { lower: true });
       }
       if (req.body.excerpt !== undefined) update.excerpt = req.body.excerpt;
       if (req.body.content !== undefined) update.content = req.body.content;

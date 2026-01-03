@@ -301,7 +301,7 @@ router.post('/offers/:id/accept', async (req: AuthRequest, res) => {
     // Create notifications for trade participants
     // Notify buyer
     await Notification.create({
-      userId: trade.buyerId._id,
+      userId: (trade.buyerId as any)._id,
       type: 'success',
       title: 'P2P Trade Started',
       message: `Your ${offer.type === 'sell' ? 'buy' : 'sell'} trade for ${tradeAmount} ${offer.cryptocurrency} has been initiated. Please send payment to complete the transaction.`,
@@ -317,7 +317,7 @@ router.post('/offers/:id/accept', async (req: AuthRequest, res) => {
 
     // Notify seller
     await Notification.create({
-      userId: trade.sellerId._id,
+      userId: (trade.sellerId as any)._id,
       type: 'success',
       title: 'P2P Trade Started',
       message: `A ${offer.type === 'sell' ? 'sell' : 'buy'} trade for ${tradeAmount} ${offer.cryptocurrency} has been initiated. Wait for payment confirmation.`,
@@ -338,13 +338,13 @@ router.post('/offers/:id/accept', async (req: AuthRequest, res) => {
         userId: admin._id,
         type: 'info',
         title: 'P2P Trade Activity',
-        message: `New P2P trade: ${trade.buyerId.email} ↔ ${trade.sellerId.email} for ${tradeAmount} ${offer.cryptocurrency}`,
+        message: `New P2P trade: ${(trade.buyerId as any).email} ↔ ${(trade.sellerId as any).email} for ${tradeAmount} ${offer.cryptocurrency}`,
         read: false,
         data: {
           action: 'p2p_trade_admin',
           tradeId: trade._id,
-          buyerId: trade.buyerId._id,
-          sellerId: trade.sellerId._id
+          buyerId: (trade.buyerId as any)._id,
+          sellerId: (trade.sellerId as any)._id
         }
       });
     }
