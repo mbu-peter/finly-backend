@@ -38,7 +38,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    let wallet: ethers.Wallet;
+    let wallet: any;
 
     // Check if user already has an encrypted key
     if (user.encryptedPrivateKey) {
