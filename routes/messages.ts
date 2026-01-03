@@ -320,7 +320,7 @@ router.get('/admin/search-users', async (req: AuthRequest, res) => {
     }
 
     const { q } = req.query;
-    let query = { role: { $ne: 'admin' } };
+    let query: any = { role: { $ne: 'admin' } };
 
     if (q && typeof q === 'string') {
       query = {
