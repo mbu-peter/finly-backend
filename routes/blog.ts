@@ -1,9 +1,10 @@
 import express from 'express';
-import slugify from 'slugify';
 import BlogPost from '../models/BlogPost.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { adminOnly } from '../middleware/admin.js';
 import { upload, blogUpload } from '../middleware/upload.js';
+
+const slugify = require('slugify');
 
 const router = express.Router();
 
@@ -82,7 +83,11 @@ router.post(
       }
 
       const tags = req.body.tags ? (typeof req.body.tags === 'string' ? req.body.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : req.body.tags) : [];
-      
+
+      if (!req.user || !req.user.id) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
       const post = await BlogPost.create({
         title: req.body.title,
         slug: slugify(req.body.title, { lower: true }),
