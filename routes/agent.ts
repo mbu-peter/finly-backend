@@ -1,5 +1,4 @@
 import express from 'express';
-import OpenAI from 'openai';
 import { authMiddleware, AuthRequest } from '../middleware/auth.js';
 import User from '../models/User.js';
 import axios from 'axios';
@@ -7,7 +6,7 @@ import axios from 'axios';
 const router = express.Router();
 
 // Initialize OpenAI client
-const openai = new OpenAI({
+const openai = new (require('openai').OpenAI)({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
