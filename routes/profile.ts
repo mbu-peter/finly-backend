@@ -25,7 +25,8 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
     // Convert portfolio map to object for frontend
     const profile = user.toObject();
     if (user.portfolio) {
-      profile.portfolio = Object.fromEntries(user.portfolio);
+      // profile.portfolio = Object.fromEntries(user.portfolio);
+      profile.portfolio = user.portfolio;
     }
     // Ensure role is included (should be included by default, but making it explicit)
     profile.role = user.role || 'user';
